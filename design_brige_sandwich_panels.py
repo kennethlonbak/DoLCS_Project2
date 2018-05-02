@@ -30,7 +30,7 @@ def matfile2SIdict(filename):
     dict_out = matfile2dict(filename)
 
     for name, field in dict_out.items():
-        for mat_name, value in field.items():
+        for mat_name in field:
             if "E" in mat_name or "G" in mat_name or "sig" in mat_name or "tau" in mat_name:
                 dict_out[name][mat_name] *= 1e6
     return dict_out
@@ -84,11 +84,6 @@ def test_fiber2prop():
 ''' ---------------------------------- Calculating panel respone --------------------------------------------------- '''
 def sandW2response():
     pass
-
-
-
-
-
 
 if __name__ == '__main__':
     #test_matfile2dict()
