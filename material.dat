@@ -1,0 +1,15 @@
+# Data for E-glass
+# All units are MPa for stress and modulies and kg/m3 for density
+    fiber steel wood
+E1 39000 210000 10000
+E2 9800 210000 10000
+G12 2800 0 0
+G13 2800 0 0
+G23 2000 0 0
+nu12 0.3 0.3 0.44
+rho 1900 7850 700
+sig1_max_ten 1100 235 40
+sig1_max_com 600 235 40
+sig2_max_ten 20 235 40
+sig2_max_com 140 235 40
+tau_max 70 136 23

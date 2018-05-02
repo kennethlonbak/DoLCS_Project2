@@ -1,0 +1,18 @@
+# Data for Divinycell H core material
+# All values are the Nominal values
+# All units are MPa for stress and modulies and kg/m3 for density
+    H35 H45 H60 H80 H100 H130 H160 H200 H250
+E1_c 40 50 70 90 135 170 200 310 400
+E2_c 40 50 70 90 135 170 200 310 400
+E1_t 49 55 75 95 130 175 205 250 320
+E2_t 49 55 75 95 130 175 205 250 320
+G12 0 0 0 0 0 0 0 0 0
+G13 0 0 0 0 0 0 0 0 0
+G23 12 15 20 27 35 50 60 73 97
+nu12 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4
+rho 38 48 60 80 100 130 160 200 250
+sig1_max_ten 1.0 1.4 1.8 2.5 3.5 4.8 5.4 7.1 9.2
+sig1_max_com 0.5 0.6 0.9 1.4 2.0 3.0 3.4 5.4 7.2
+sig2_max_ten 1.0 1.4 1.8 2.5 3.5 4.8 5.4 7.1 9.2
+sig2_max_com 0.5 0.6 0.9 1.4 2.0 3.0 3.4 5.4 7.2
+tau_max 0.4 0.56 0.76 1.15 1.6 2.2 2.6 3.5 4.5
