@@ -43,9 +43,9 @@ def SW_SHEAR_STIFF(G_c,t_f,t_c,**kwargs):
 
     return S
 
-def BEAM_SSE_UNI_PRESS_DEFORM(x, L, pres, **kwargs):
+def BEAM_SSE_UNI_PRESS_DEFLE(x, L, pres, **kwargs):
     '''
-    calculates deflection for BEAM that has Simply Supported Edges subjected to UNIform PRESsure
+    calculates DEFLEction for BEAM that has Simply Supported Edges subjected to UNIform PRESsure
 
     :param x: (float or numpy array) x-coordinate for the beam
     :param L: (float) Length of the beam
@@ -80,9 +80,9 @@ def BEAM_SSE_UNI_PRESS_DEFORM(x, L, pres, **kwargs):
     return d
 
 
-def BEAM_BEC_UNI_PRESS_DEFORM(x, L, pres, **kwargs):
+def BEAM_BEC_UNI_PRESS_DEFLE(x, L, pres, **kwargs):
     '''
-    calculates deflection for BEAM that has Both Edges Clamped subjected to UNIform PRESsure
+    calculates DEFLEction for BEAM that has Both Edges Clamped subjected to UNIform PRESsure
 
     :param x: (float or numpy array) x-coordinate for the beam
     :param L: (float) Length of the beam

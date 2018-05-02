@@ -1,8 +1,6 @@
 import pylab as py
 import sandwich_beam as SWB
-import sys
-sys.path.append("/home/kloenbaek/Desktop/DoLCS_Project1")
-from ABD_matrix import fib2ABD
+import ABD_matrix
 
 ''' -----------------------  Reading material files ---------------------------------------------------------------- '''
 def matfile2dict(filename):
@@ -58,20 +56,20 @@ def test_matfile2dict():
 
 ''' ---------------------------------- Solving ABD for matrix layup ------------------------------------------------ '''
 def fiber2prop(fib_prop, angle, thickness):
-    fi2ABD_inp = {"fiber_nr": len(angle)}
+    fib2ABD_inp = {"fiber_nr": len(angle)}
     z_start = 0.0
     # Generating input for ABD
     for i in range(1,len(angle)+1):
-        fi2ABD_inp[i] = fib_prop.copy()
-        fi2ABD_inp[i]["angle"] = angle[i - 1] * py.pi / 180
-        fi2ABD_inp[i]["thickness"] = thickness[i - 1]
-        fi2ABD_inp[i]["z_start"] = z_start
-        fi2ABD_inp[i]["z_end"] = z_start + thickness[i - 1]
+        fib2ABD_inp[i] = fib_prop.copy()
+        fib2ABD_inp[i]["angle"] = angle[i - 1] * py.pi / 180
+        fib2ABD_inp[i]["thickness"] = thickness[i - 1]
+        fib2ABD_inp[i]["z_start"] = z_start
+        fib2ABD_inp[i]["z_end"] = z_start + thickness[i - 1]
 
         z_start += thickness[i - 1]
 
-    fi2ABD_inp["thickness"] = z_start
-    lami_prop = fib2ABD(fi2ABD_inp)
+    fib2ABD_inp["thickness"] = z_start
+    lami_prop = ABD_matrix.fib2ABD(fib2ABD_inp)
     return lami_prop
 
 def test_fiber2prop():
@@ -84,6 +82,8 @@ def test_fiber2prop():
 
 
 ''' ---------------------------------- Calculating panel respone --------------------------------------------------- '''
+def sandW2response():
+    pass
 
 
 
