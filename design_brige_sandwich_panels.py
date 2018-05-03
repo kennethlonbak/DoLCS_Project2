@@ -1,6 +1,7 @@
 import pylab as py
 import sandwich_beam as SWB
 import ABD_matrix
+from collections import OrderedDict as Dict
 
 ''' -----------------------  Reading material files ---------------------------------------------------------------- '''
 def matfile2dict(filename):
@@ -91,10 +92,16 @@ def SW_BEAM2response(L, W, press, fib_ang_com, t_f, t_c, core_grade, fib_prop, d
     SW_inp["L"]["press"] = press
 
     # set t_f and E_f
-    SW_inp["L"]["t_f"] = t_f
-    fib_angles = [fib_ang_com,fib_ang_com+fib_ang_bet,fib_ang_com+fib_ang_bet,fib_ang_com]
-    #fib_angles = [fib_ang_com,fib_ang_com+fib_ang_bet,fib_ang_com,fib_ang_com+fib_ang_bet]
-    fib_thickness = [t_f/4]*4
+    if isinstance(t_f,list):
+        fib_thickness = t_f+t_f[::-1]
+        SW_inp["L"]["t_f"] = sum(fib_thickness)
+        fib_angles = [fib_ang_com, fib_ang_com + fib_ang_bet]*int(len(t_f)/2)
+        fib_angles += fib_angles[::-1]
+    else:
+        fib_thickness = [t_f / 4] * 4
+        SW_inp["L"]["t_f"] = t_f
+        fib_angles = [fib_ang_com, fib_ang_com + fib_ang_bet, fib_ang_com + fib_ang_bet, fib_ang_com]
+
     lami_prop = fiber2prop(fib_prop, fib_angles, fib_thickness)
     SW_inp["L"]["E_f"] = lami_prop["E_x"]
 
@@ -132,57 +139,81 @@ def SW_BEAM2response(L, W, press, fib_ang_com, t_f, t_c, core_grade, fib_prop, d
     # Calculate weight of panel
     out["m"] = PANEL_WEIGHT(W=W,**SW_inp["L"])
 
-    out["con"] = {}
-    # Compare max deflection with the allow
-    out["con"]["deff"] = {}
-    out["con"]["deff"]["L"] = out["L"]["deff"]/deff_max
-    out["con"]["deff"]["W"] = out["W"]["deff"]/deff_max
+    out["con"] = con2dict(out["L"]["deff"], out["W"]["deff"],
+                          out["L"]["sig_max_f"], out["L"]["sig_max_c"],
+                          out["W"]["sig_max_f"], out["W"]["sig_max_c"],
+                          out["L"]["tau_max_f"], out["L"]["tau_max_c"],
+                          out["W"]["tau_max_f"], out["W"]["tau_max_c"],
+                          deff_max, lami_prop[1], core_grade)
 
-    # Compare max stress with the allow
-    out["con"]["stress"] = {}
-    # Face
-    out["con"]["stress"]["face"] = {}
-    out["con"]["stress"]["face"]["L"] = {}
-    out["con"]["stress"]["face"]["W"] = {}
-    out["con"]["stress"]["face"]["L"]["com"] = out["L"]["sig_max_c"]/lami_prop[1]["sig1_max_com"]
-    out["con"]["stress"]["face"]["W"]["com"] = out["W"]["sig_max_c"]/lami_prop[1]["sig2_max_com"]
-
-    out["con"]["stress"]["face"]["L"]["ten"] = out["L"]["sig_max_c"]/lami_prop[1]["sig1_max_ten"]
-    out["con"]["stress"]["face"]["W"]["ten"] = out["W"]["sig_max_c"]/lami_prop[1]["sig2_max_ten"]
-
-    # Core
-    out["con"]["stress"]["core"] = {}
-    out["con"]["stress"]["core"]["L"] = {}
-    out["con"]["stress"]["core"]["W"] = {}
-    out["con"]["stress"]["core"]["L"]["com"] = out["L"]["sig_max_c"]/core_grade["sig1_max_com"]
-    out["con"]["stress"]["core"]["W"]["com"] = out["W"]["sig_max_c"]/core_grade["sig2_max_com"]
-
-    out["con"]["stress"]["core"]["L"]["ten"] = out["L"]["sig_max_c"]/core_grade["sig1_max_ten"]
-    out["con"]["stress"]["core"]["W"]["ten"] = out["W"]["sig_max_c"]/core_grade["sig2_max_ten"]
-
-    # Compare max shear stress with the allow
-    out["con"]["shear"] = {}
-    out["con"]["shear"]["face"] = {}
-    out["con"]["shear"]["core"] = {}
-
-    out["con"]["shear"]["face"] = {}
-    out["con"]["shear"]["face"]["L"] = out["L"]["tau_max_f"]/lami_prop[1]["tau_max"]
-    out["con"]["shear"]["face"]["W"] = out["W"]["tau_max_f"]/lami_prop[1]["tau_max"]
-
-    out["con"]["shear"]["core"] = {}
-    out["con"]["shear"]["core"]["L"] = out["L"]["tau_max_c"]/core_grade["tau_max"]
-    out["con"]["shear"]["core"]["W"] = out["W"]["tau_max_c"]/core_grade["tau_max"]
-
-    out["con"]["is_con_okay"] = check_con(out["con"])
-    if out["con"]["is_con_okay"]:
-        out["con"]["closest"] = out["con"]["is_con_okay"].closest
-    else:
-        out["con"]["con_broken"] = out["con"]["is_con_okay"].con_broken
+    #out["con"]["is_con_okay"] = check_con(out["con"])
+    #if out["con"]["is_con_okay"]:
+    #    out["con"]["closest"] = out["con"]["is_con_okay"].closest
+   # else:
+     #   out["con"]["con_broken"] = out["con"]["is_con_okay"].con_broken
 
     return out
 
+def con2dict(L_deff, W_deff,
+             L_sig_max_f, L_sig_max_c,
+             W_sig_max_f, W_sig_max_c,
+             L_tau_max_f, L_tau_max_c,
+             W_tau_max_f, W_tau_max_c,
+             deff_max, lami_prop, core_prop):
+    con = Dict()
+    # Compare max deflection with the allow
+    con["deff"] = Dict()
+    con["deff"]["L"] = L_deff / deff_max
+    con["deff"]["W"] = W_deff / deff_max
 
+    # Compare max stress with the allow
+    con["stress"] = Dict()
+    # Face
+    con["stress"]["face"] = Dict()
+    con["stress"]["face"]["L"] = Dict()
+    con["stress"]["face"]["W"] = Dict()
+    # Compressive
+    con["stress"]["face"]["L"]["com"] = L_sig_max_f / lami_prop["sig1_max_com"]
+    con["stress"]["face"]["W"]["com"] = W_sig_max_f / lami_prop["sig2_max_com"]
+    # Tensile
+    con["stress"]["face"]["L"]["ten"] = L_sig_max_f / lami_prop["sig1_max_ten"]
+    con["stress"]["face"]["W"]["ten"] = W_sig_max_f / lami_prop["sig2_max_ten"]
 
+    # Core
+    con["stress"]["core"] = Dict()
+    con["stress"]["core"]["L"] = Dict()
+    con["stress"]["core"]["W"] = Dict()
+    con["stress"]["core"]["L"]["com"] = L_sig_max_c / core_prop["sig1_max_com"]
+    con["stress"]["core"]["W"]["com"] = W_sig_max_c / core_prop["sig2_max_com"]
+
+    con["stress"]["core"]["L"]["ten"] = L_sig_max_c / core_prop["sig1_max_ten"]
+    con["stress"]["core"]["W"]["ten"] = W_sig_max_c / core_prop["sig2_max_ten"]
+
+    # Compare max shear stress with the allow
+    con["shear"] = Dict()
+    con["shear"]["face"] = Dict()
+    con["shear"]["core"] = Dict()
+
+    con["shear"]["face"] = Dict()
+    con["shear"]["face"]["L"] = L_tau_max_f / lami_prop["tau_max"]
+    con["shear"]["face"]["W"] = W_tau_max_f / lami_prop["tau_max"]
+
+    con["shear"]["core"] = Dict()
+    con["shear"]["core"]["L"] = L_tau_max_c / core_prop["tau_max"]
+    con["shear"]["core"]["W"] = W_tau_max_c / core_prop["tau_max"]
+    return con
+
+def conDict2conArray(con):
+    array = con_rec(con,[])
+    return py.array(array)
+
+def con_rec(con_in, array):
+    for name, value in con_in.items():
+        if isinstance(value,Dict):
+            array = con_rec(con_in[name], array)
+        else:
+            array.append(value)
+    return array
 
 
 class PANEL_WEIGHT:
@@ -246,9 +277,9 @@ def test_SW_BEAM2response():
     g = 9.82 # [m/s^2]
     press = weight_pressure*g # [N/m^2]
     fib_prop = matfile2SIdict("material.dat")["fiber"]
-    core_grade = matfile2SIdict("Divinycell.dat")["H35"]
+    core_grade = matfile2SIdict("Divinycell.dat")["H60"]
     t_tot = 0.25
-    t_f_norm = 0.15
+    t_f_norm = 0.4
     t_f = t_tot*t_f_norm
     t_c = t_tot - 2*t_f
     fib_ang_com = 0.0
@@ -260,13 +291,73 @@ def test_SW_BEAM2response():
         print("%s: %s" % (name, value))
 
 ''' ---------------------------- Optimizing Panel ------------------------------------------------------------------ '''
-def minWeight(t_tot,t_f_norm):
-    pass
+def param2weight(t_tot, t_f_norm, t_f_ratio, fib_ang_com, fib_ang_bet, L, W, press, core_grade, fib_prop, deff_max):
+    t_f = t_tot * t_f_norm
+    t_c = t_tot - 2 * t_f
+    rho_f = fib_prop["rho"]
+    rho_c = core_grade["rho"]
+    weight = PANEL_WEIGHT(L, W, t_c, t_f, rho_c, rho_f).weight
+    return weight
 
+def x2weight(x, L, W, press, core_grade, fib_prop, deff_max):
+    return param2weight(*x, L, W, press, core_grade, fib_prop, deff_max)
+
+def param2con(t_tot, t_f_norm, t_f_ratio, fib_ang_com, fib_ang_bet, L, W, press, core_grade, fib_prop, deff_max, return_out= False):
+    t_f = t_tot * t_f_norm
+    t_c = t_tot - 2 * t_f
+    t_f = [t_f/2*t_f_ratio,t_f/2*(1-t_f_ratio)]
+
+    out = SW_BEAM2response(L, W, press, fib_ang_com, t_f, t_c, core_grade, fib_prop, deff_max, fib_ang_bet)
+    con_array = conDict2conArray(out["con"])
+    if return_out:
+        return out
+    else:
+        return con_array
+
+def x2con(x, L, W, press, core_grade, fib_prop, deff_max):
+    return param2con(*x, L, W, press, core_grade, fib_prop, deff_max)
+
+def test_param2weight_and_param2con():
+    L = 4.2 # [m]
+    W = 4.0 # [m]
+    weight_pressure = 5e3 # [kg/m^2]
+    g = 9.82 # [m/s^2]
+    press = weight_pressure*g # [N/m^2]
+    fib_prop = matfile2SIdict("material.dat")["fiber"]
+    core_grade = matfile2SIdict("Divinycell.dat")["H60"]
+    t_tot = 0.25
+    t_f_norm = 0.4
+    fib_ang_com = 0.0
+    fib_ang_bet = 90.0
+    t_f_ratio = 0.5
+    deff_max = 40e-3
+
+    weight = param2weight(t_tot, t_f_norm, t_f_ratio, fib_ang_com, fib_ang_bet, L, W, press, core_grade, fib_prop, deff_max)
+    con_array = param2con(t_tot, t_f_norm, t_f_ratio, fib_ang_com, fib_ang_bet, L, W, press, core_grade, fib_prop, deff_max)
+    print("weight=%s"%weight)
+    print("con_array=%s" % con_array)
+
+def param2opt():
+    L = 4.2  # [m]
+    W = 4.0  # [m]
+    weight_pressure = 5e3  # [kg/m^2]
+    g = 9.82  # [m/s^2]
+    press = weight_pressure * g  # [N/m^2]
+    fib_prop = matfile2SIdict("material.dat")["fiber"]
+    core_grade = matfile2SIdict("Divinycell.dat")["H60"]
+    t_tot = 0.25
+    t_f_norm = 0.4
+    fib_ang_com = 0.0
+    fib_ang_bet = 90.0
+    t_f_ratio = 0.5
+    deff_max = 40e-3
+    x0 = [t_tot, t_f_norm, t_f_ratio, fib_ang_com, fib_ang_bet]
+    args = (L, W, press, core_grade, fib_prop, deff_max)
 
 if __name__ == '__main__':
     #test_matfile2dict()
     #test_fiber2prop()
-    test_SW_BEAM2response()
+    #test_SW_BEAM2response()
+    test_param2weight_and_param2con()
 
 
