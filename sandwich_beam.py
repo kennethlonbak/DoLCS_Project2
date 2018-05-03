@@ -43,75 +43,167 @@ def SW_SHEAR_STIFF(G_c,t_f,t_c,**kwargs):
 
     return S
 
-def BEAM_SSE_UNI_PRESS_DEFLE(x, L, pres, **kwargs):
+''' ----------- Simply Supported ----------------------------------------------------------------------------------- '''
+def BEAM_SSE_UNI_PRESS_MAX_DEFLE(L, press, E_f, t_f, E_c, t_c, G_c, **kwargs):
     '''
-    calculates DEFLEction for BEAM that has Simply Supported Edges subjected to UNIform PRESsure
+    calculates MAXimum DEFLEction for BEAM that has Simply Supported Edges subjected to UNIform PRESsure
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), p. 4.26
 
     :param x: (float or numpy array) x-coordinate for the beam
     :param L: (float) Length of the beam
-    :param pres: (float) Uniform pressure
+    :param press: (float) Uniform pressure
     :param kwargs: (dict) Needs to containe D and S or information to compute it!
     :return: (float or numpy array, depending on x) Total deflection at x
     '''
 
     # Getting Flex-Rigi
-    if "D" in kwargs:
-        D = kwargs["D"]
-    else:
-        D = SW_FLEX_RIGI(**kwargs)
+    D = SW_FLEX_RIGI(E_f, t_f, E_c, t_c)
 
     # Getting Shear-Stiffness
-    if "S" in kwargs:
-        S = kwargs["S"]
-    else:
-        S = SW_SHEAR_STIFF(**kwargs)
+    S = SW_SHEAR_STIFF(G_c,t_f,t_c)
+
+    # Relative x distance
+    xl = 1/2
+
+    # Bending deflection
+    d_b = press * L ** 4 / (24 * D) * (xl ** 4 - 2 * xl ** 3 + xl)
+
+    # Shear deflection
+    d_s = press * L ** 2 / (2 * S) * (xl - xl ** 2)
+
+    # Total deflection
+    d = d_b + d_s
+    return d
+
+def BEAM_SSE_UNI_PRESS_BM_SF(x, L, press, **kwargs):
+    '''
+    calculates Bending Moment and Shear Force for a BEAM that has Simply Supported Edges subjected to UNIform PRESsure
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), p. 4.26
+
+    :param x: (float or numpy array) x-coordinate for the beam
+    :param L: (float) Length of the beam
+    :param press: (float) Uniform pressure
+    :param kwargs: (dict) Needs to containe D and S or information to compute it!
+    :return: (float or numpy array, depending on x) Total deflection at x
+    '''
 
     # Relative x distance
     xl = x/L
 
-    # Bending deflection
-    d_b = pres*L**4/(24*D)*(xl**4-2*xl**3+xl)
+    # Bending Moment
+    M = press * L ** 2 * xl * (1 - xl)
 
-    # Shear deflection
-    d_s = pres*L**2/(2*S)*(xl-xl**2)
+    # Shear Force
+    T = press * L * (1 / 2 - xl)
 
-    # Total deflection
-    d = d_b + d_s
-    return d
+    return M, T
 
-
-def BEAM_BEC_UNI_PRESS_DEFLE(x, L, pres, **kwargs):
+def BEAM_SSE_UNI_PRESS_MAX_STESS_F_C(press, L, t_c, t_f, E_f, E_c, **kwargs):
     '''
-    calculates DEFLEction for BEAM that has Both Edges Clamped subjected to UNIform PRESsure
+    calculates MAXimum STRESS in the Face and Core for a BEAM that has Simply Supported Edges subjected to UNIform PRESsure
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), combining eq. 3.8 (p. 3.3) with Mx from p. 4.26
+
+    :return: (float or numpy array, depending on x) Total deflection at x
+    '''
+    # Getting Flex-Rigi
+    D = SW_FLEX_RIGI(E_f,t_f,E_c,t_c)
+
+    sig_max_f = press * L ** 2 * (t_c / 2 + t_f) * E_f / (4 * D)
+
+    sig_max_c = press * L ** 2 * (t_c / 2) * E_c / (4 * D)
+
+    return sig_max_f, sig_max_c
+
+
+''' ----------- Clamped Edges -------------------------------------------------------------------------------------- '''
+def BEAM_BEC_UNI_PRESS_MAX_DEFLE(L, press, E_f, t_f, E_c, t_c, G_c, **kwargs):
+    '''
+    calculates MAXimum DEFLEction for BEAM that has Both Edges Clamped subjected to UNIform PRESsure
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), p. 4.27
 
     :param x: (float or numpy array) x-coordinate for the beam
     :param L: (float) Length of the beam
-    :param pres: (float) Uniform pressure
+    :param press: (float) Uniform pressure
     :param kwargs: (dict) Needs to containe D and S or information to compute it!
     :return: (float or numpy array, depending on x) Total deflection at x
     '''
 
     # Getting Flex-Rigi
-    if "D" in kwargs:
-        D = kwargs["D"]
-    else:
-        D = SW_FLEX_RIGI(**kwargs)
+    D = SW_FLEX_RIGI(E_f, t_f, E_c, t_c)
 
     # Getting Shear-Stiffness
-    if "S" in kwargs:
-        S = kwargs["S"]
-    else:
-        S = SW_SHEAR_STIFF(**kwargs)
+    S = SW_SHEAR_STIFF(G_c, t_f, t_c)
 
     # Relative x distance
-    xl = x / L
+    xl = 1/2
 
     # Bending deflection
-    d_b = pres * L ** 4 / (24 * D) * (xl ** 4 - 2 * xl ** 3 + xl**2)
+    d_b = press * L ** 4 / (24 * D) * (xl ** 4 - 2 * xl ** 3 + xl ** 2)
 
     # Shear deflection
-    d_s = pres * L ** 2 / (2 * S) * (xl - xl ** 2)
+    d_s = press * L ** 2 / (2 * S) * (xl - xl ** 2)
 
     # Total deflection
     d = d_b + d_s
     return d
+
+def BEAM_BEC_UNI_PRESS_BM_SF(x, L, press, **kwargs):
+    '''
+    calculates Bending Moment and Shear Force for a BEAM that has Both Edges Clamped subjected to UNIform PRESsure
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), p. 4.27
+
+    :param x: (float or numpy array) x-coordinate for the beam
+    :param L: (float) Length of the beam
+    :param press: (float) Uniform pressure
+    :param kwargs: (dict) Needs to containe D and S or information to compute it!
+    :return: (float or numpy array, depending on x) Total deflection at x
+    '''
+
+    # Relative x distance
+    xl = x/L
+
+    # Bending Moment
+    M = press * L ** 2 / 2 * (xl - xl ** 2 - 1 / 6)
+
+    # Shear Force
+    T = press * L * (1 / 2 - xl)
+
+    return M, T
+
+def BEAM_BEC_UNI_PRESS_MAX_STESS_F_C(press, L, t_c, t_f, E_f, E_c, **kwargs):
+    '''
+    calculates MAXimum STRESS in the Face and Core for a BEAM that has Both Edges Clamped subjected to UNIform PRESsure
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), combining eq. 3.8 (p. 3.3) with Mx from p. 4.27 eval at
+    x/L = 1/2
+
+    :return:
+    '''
+    # Getting Flex-Rigi
+    D = SW_FLEX_RIGI(E_f,t_f,E_c,t_c)
+
+    sig_max_f = press * L ** 2 * (t_c / 2 + t_f) * E_f / (24 * D)
+
+    sig_max_c = press * L ** 2 * (t_c / 2) * E_c / (24 * D)
+
+    return sig_max_f, sig_max_c
+
+def BEAM_UNI_PRESS_MAX_SHEAR_STESS_F_C(press, L, t_c, t_f, E_f, E_c, **kwargs):
+    '''
+    calculates MAXimum STRESS in the Face and Core for a BEAM subjected to UNIform PRESsure
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), combining eq. 3.14 and 3.15 (p. 3.3) with Tx from p. 4.26
+    and 4.27 eval at x/L = 0
+
+    :return:
+    '''
+    # Getting Flex-Rigi
+    D = SW_FLEX_RIGI(E_f,t_f,E_c,t_c)
+
+    Tx_max = press*L/2
+
+    d = t_c+t_f
+
+    tau_max_f = Tx_max/D*(E_f*t_f*d/2)
+
+    tau_max_c = Tx_max/D*(E_f*t_f*d/2+E_c*t_c**2/8)
+
+    return tau_max_f, tau_max_c
