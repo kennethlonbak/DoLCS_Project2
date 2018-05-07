@@ -1,6 +1,7 @@
 import pylab as py
+import scipy.integrate as integrate
 
-def SW_FLEX_RIGI(E_f,t_f,E_c,t_c,**kwargs):
+def UNIT_WIDTH_SW_FLEX_RIGI(E_f,t_f,E_c,t_c,**kwargs):
     '''
     SandWich FLEXural RIGIdity
     Ref: An Introduction to Sandwich Structures (Dan Zenkert), p. 3.2, eq. 3.4
@@ -23,6 +24,18 @@ def SW_FLEX_RIGI(E_f,t_f,E_c,t_c,**kwargs):
     D = 2*D_f+D_0+D_c
     return D
 
+def SW_FLEX_RIGI(w, E_f, t_f, E_c, t_c, **kwargs):
+    '''
+    SandWich FLEXural RIGIdity
+    Ref: An Introduction to Sandwich Structures (Dan Zenkert), p. 3.2, eq. 3.4
+
+    :return: D
+    '''
+    L_x = t_c + 2*t_f
+    L_y = w
+    return FLEX_RIGI(L_x, L_y, E_x_SW, E_f=E_f, E_c = E_c, t_c=t_c)
+
+
 def SW_SHEAR_STIFF(G_c,t_f,t_c,**kwargs):
     '''
     SandWich SHEAR STIFFness
@@ -42,6 +55,20 @@ def SW_SHEAR_STIFF(G_c,t_f,t_c,**kwargs):
     S = G_c*t_cf**2/t_c
 
     return S
+
+def FLEX_RIGI(L_x, L_y, E_xy,  **kwargs):
+    int_fun = lambda x,y: E_xy(x,y,**kwargs)*(x**2)
+    bond = [[-L_x / 2, L_x / 2],[-L_y / 2, L_y / 2]]
+    int_out = integrate.nquad(int_fun, bond)
+    D = int_out[0]
+    #print("D_error: %s"%int_out[1])
+    return D
+
+def E_x_SW(x, y, t_c, E_c, E_f, **kwargs):
+    if abs(x) > t_c/2:
+        return E_f
+    else:
+        return E_c
 
 ''' ----------- Simply Supported ----------------------------------------------------------------------------------- '''
 def BEAM_SSE_UNI_PRESS_MAX_DEFLE(L, press, E_f, t_f, E_c, t_c, G_c, **kwargs):
@@ -207,3 +234,19 @@ def BEAM_UNI_PRESS_MAX_SHEAR_STESS_F_C(press, L, t_c, t_f, E_f, E_c, **kwargs):
     tau_max_c = Tx_max/D*(E_f*t_f*d/2+E_c*t_c**2/8)
 
     return tau_max_f, tau_max_c
+
+if __name__ == '__main__':
+    t_tot = 2.0
+    t_f_norm = 0.2
+    t_f = t_tot*t_f_norm
+    t_c = t_tot-2*t_f
+    E_f = 2.0
+    E_c = 1.0
+    w = 1.0
+
+    D_general = SW_FLEX_RIGI(w, E_f, t_f, E_c, t_c)
+    D_unit = UNIT_WIDTH_SW_FLEX_RIGI(E_f,t_f,E_c,t_c)
+
+    vari = locals().copy()
+    for name, value in vari.items():
+        print("%s: %s" % (name, value))

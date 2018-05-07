@@ -112,3 +112,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Latex
+*.aux
+*.out
+*.pdf
+*.gz
+
+
