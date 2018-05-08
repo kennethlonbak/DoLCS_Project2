@@ -56,13 +56,152 @@
 \maketitle  
 \section{Part 1}
 % Introduction 
+
 % Present current design (As well as values)
+\subsection{Current design}
+Following the project description \cite{ProbDecib} the current bridge deck and deck support is made out of wood. \\
+The deck is made out of planks of \unit[4.2]{m} long and \unit[25]{mm} (\unit[0.025]{m}) thick. The width of the planks are not stated, but from the pictures the planks seems to be tightly spaced with the length in the transverse direction.\\
+The deck is supported by wooden beams with a cross-section of 225x\unit[175]{mm} (0.225x\unit[175]{m}) and a length of \unit[4]{m}. It is not stated how many of these beams there are but from the pictures it looks like there are 7. \\
+At the end the whole structure is supported by transverse wooden beams with a cross-section of 450x\unit[200]{mm} (0.45x\unit[0.2]{m}) and a length of \unit[4.9]{m}. There are 8 of these wooden transverse beams.\\
+For the coming part of this project the proposed designs are going to be compared with weight of the current bridge, or more specifically the weight of one panel. The weight of one panel is going to be the weight of a bridge deck that is 4.0x\unit[4.2]{m} and one transverse beam. Knowing the volume of the wood the weight can be calculated with the density of the wood being \unitfrac[700]{kg}{m$^3$} \cite[p. 4]{ProbDecib}:
+\begin{align}
+&& \#\text{ elements x Length x Width x Thickness} && \text{Volume} && \text{Weight}\nonumber\\
+\text{Planks} && 1\cdot\unit[4.0]{m}\cdot\unit[4.2]{m}\cdot\unit[0.025]{m} && \unit[0.42]{m^3} && \unit[294.0]{kg}\nonumber\\
+\text{Longitudinal Beams} && 7\cdot\unit[4.0]{m}\cdot\unit[0.175]{m}\cdot\unit[0.225]{m} && \unit[1.10]{m^3}&& \unit[771.8]{kg}\nonumber\\
+\textbf{Total panel} && - && \mathbf{\unit[1.52]{\textbf{m}^3}}&& \mathbf{\unit[1065.8]{\textbf{kg}}}\nonumber\\
+\text{Transvers Beams} && 1\cdot\unit[4.9]{m}\cdot\unit[0.2]{m}\cdot\unit[0.45]{m} && \unit[0.44]{m^3} && \unit[308.7]{kg} \nonumber\\
+\textbf{Panel + Trans. Beam} && - && \mathbf{\unit[1.96]{\textbf{m}^3}}&& \mathbf{\unit[1374.4]{\textbf{kg}}}
+\end{align} 
+The total thickness of the bridge deck is another measure that is crucial for the project. The current bridge deck is:
+\begin{align}
+\textbf{T}_{\textbf{panel}} &= \text{T}_{\text{plank}} + \text{T}_{\text{logn}} \\
+& = \unit[0.025]{m} + \unit[0.225]{m} \\
+& = \mathbf{\unit[0.25]{\textbf{m}}}\\
+\nonumber\\
+\textbf{T}_{\textbf{deck}} &= \text{T}_{\text{plank}} + \text{T}_{\text{logn}} +\text{T}_{\text{trans}} \\
+& = \unit[0.025]{m} + \unit[0.225]{m} + \unit[0.45]{m} \\
+& = \mathbf{\unit[0.7]{\textbf{m}}}
+\end{align}
+With the current design in place the requirements for the panels will be presented.
+
 % List customer needs
+\subsection{Design requirements}
+In order to make a good satisfying design the following requirements should be meet \cite{ProbDecib}:
+\begin{itemize}
+	\item Maximum panel thickness should not exeet \unit[250]{mm} (\unit[0.25]{m})
+	\item Should be able to withstand a pressure load of \unitfrac[5]{ton}{m$^2$} ($\unitfrac[5]{ton}{m^2}\cdot \unitfrac[1000]{kg}{ton}\cdot \unitfrac[9.82]{m}{s^2}=\unitfrac[49.1\cdot10^3]{N}{m^2}$) with a maximum deflection of \unit[40]{mm} (\unit[0.04]{m})
+	\item Should be able to withstand a point load of \unit[2]{ton} ($\unit[2]{ton}\cdot \unitfrac[1000]{kg}{ton}\cdot \unitfrac[9.82]{m}{s^2}=\unit[19.6\cdot10^3]{N}$) on an area of 100x\unit[100]{mm} (0.1x\unit[0.1]{m} = \unit[0.01]{m$^2$}) with a maximum deflection of \unit[40]{mm} (\unit[0.04]{m})
+	\item The panel should be of fiber reinforced skins and foam core
+	\item The panel support should be a transverse structure build into the panel
+\end{itemize}
+
 % List assumptions
+\subsection{List of assumptions for suggested panel design}
+For the following suggested designs the following assumptions has been made:
 % State boundary conditions
+\begin{itemize}
+	\item The panel can be modeled using sandwich beam theory (Timoshenko Beam)
+	\item The beam is assumed to have boundary conditions as a \textit{Simply Supported Beam} (SSB)
+	\item The effect of the transverse boundary conditions are assumed to negligible and the beam can be modeled as a beam of unit width
+	\item The "point load" is modeled as a point load at the middle of the beam with units of $\unitfrac{N}{m}$ so that $P=\unit[19.6\cdot10^3]{N}/\unit[0.1]{m} =\unitfrac[196\cdot10^3]{N}{m}$
+\end{itemize}
+
+% Governing equations
+\subsection{Governing Equations}
+To calculate the deflections and stresses for the beams the following equations was used. \\
+In order to calculate the deflection for the beam the so called flexural rigidity is needed. It can be computed by using \cite[p. 3.2 eq. 3.4]{IntroSW}:
+\begin{align}
+D = 2D_f + D_0 + D_c = 2\frac{E_f t_f^3}{12}+ \frac{E_f t_f \left(t_c+t_f\right)^2}{2} + \frac{E_c t_c^3}{12}
+\end{align}
+Where $E$ is the elastic modulus $t$ is the thickness and the subscript $f$ is for \textit{face} (or \textit{skin}) and $c$ is for \textit{core}. $D_{f/c}$ is the  bending stiffness for the element at its own center. $D_0$ is the effect of translating the faces away from the center, and the reason why the sandwich structure is good. \\
+The shear stiffness is also needed and it can be computed as \cite[p. 4.3 eq. 4.6]{IntroSW}:
+\begin{align}
+S = \frac{G_c (t_c+t_f)^2}{t_c}
+\end{align}
+Where $G_c$ is the shear modulus of the core and $t$ is again the thickness of the elements. 
+
+\subsubsection{Simply Supported Beam subjected to Uniform Pressure}
+With the flexural rigidity and shear stiffness above the deflections, transverse force and and bending moment can be found as \cite[p. 4.26 s. 4.9.5]{IntroSW}:
+\begin{align}
+\delta(x) &= \delta_b(x)+ \delta_s(x) = \frac{qL^4}{24 D}\left(\left(\frac{x}{L}\right)^4-2\left(\frac{x}{L}\right)^3+\left(\frac{x}{L}\right)\right) + \frac{qL^2}{2 S}\left(\left(\frac{x}{L}\right)-\left(\frac{x}{L}\right)^2\right)\\
+T_x(x) &= qL\left(\frac{1}{2}-\frac{x}{L}\right)\\
+M_x(x) &= \frac{qL^2}{2}\frac{x}{L}\left(1-\frac{x}{L}\right)
+\end{align}  
+The maximum deflection will happen at $x/L = 1/2$, resulting in:
+\begin{align}
+\delta_{\max} = \frac{qL^4}{24 D} \frac{5}{16} + \frac{qL^2}{2 S} \frac{1}{4}
+\end{align}
+Since the structure needs to be able to handle the maximum stresses. The stresses can be computed with \cite[p. 3.3 eq. 3.8]{IntroSW} and $M_x$ above:
+\begin{align}
+\sigma_f = M_x \frac{z E_f}{D} = \frac{qL^2}{2}\frac{x}{L}\left(1-\frac{x}{L}\right)\frac{z E_f}{D} && &\text{for } \frac{t_c}{2}<|z|<\frac{t_c}{2} + t_f \\
+\sigma_c = M_x \frac{z E_c}{D} = \frac{qL^2}{2}\frac{x}{L}\left(1-\frac{x}{L}\right)\frac{z E_c}{D} && &\text{for } |z|<\frac{t_c}{2}
+\end{align}
+In order to get the maximum stress the maximum bending moment ($M_x$) and $z$ value should be used. $M_{x,max}$ will be at $x/L = 1/2$ and $z_{max}$ is found from the limits:
+\begin{align}
+\sigma_{f,\max} &= \left(\frac{t_c}{2}+t_f\right)\frac{q E_f L^2}{8 D}  \\
+\sigma_{c,\max} &= \frac{q t_c E_cL^2}{16 D} 
+\end{align}
+For the shear the maximum is already given with $T_{x,max}$ being at $x/L=0=1$ in \cite[p. 3.4 eq. 3.14 and 3.15]{IntroSW}:
+\begin{align}
+\tau_{f,\max} &= \frac{T_{x,\max}}{D}\left(\frac{E_f t_f d}{2}\right) = \frac{q L}{2D}\left(\frac{E_f t_f d}{2}\right) \\
+\tau_{c,\max} &= \frac{T_{x,\max}}{D}\left(\frac{E_f t_f d}{2}+\frac{E_ct_c^3}{8}\right) = \frac{q L}{2D}\left(\frac{E_f t_f d}{2}+\frac{E_ct_c^3}{8}\right)
+\end{align}
+
+\subsubsection{Simply Supported Beam subjected to Point Load}
+The same as before but this time it can be found at \cite[p. 4.21 s. 4.9.4]{IntroSW} where $a=b=1/2$ and introducing a new variable:
+\begin{align}
+\tilde{x} &= L\left(\frac{1}{2}-\left|\frac{1}{2}-\frac{x}{L}\right|\right)\\
+\delta(x) &= \delta_b(x)+ \delta_s(x) = \frac{PL^3}{12 D}\left(\frac{3}{4}\tilde{x}-\tilde{x}^3\right) + \frac{PL}{2 S}\tilde{x}\\
+|T_x(x)| &= \frac{P}{2}\\
+M_x(x) &= \frac{P}{2}L\tilde{x}
+\end{align}
+The maximum deflection will happen at $x/L = 1/2$, resulting in:
+\begin{align}
+\delta_{\max} = \frac{PL^3}{12 D} \frac{1}{4} + \frac{PL}{2 S} \frac{1}{2}
+\end{align}  
+The stresses can be computed with \cite[p. 3.3 eq. 3.8]{IntroSW} and $M_x$ above:
+\begin{align}
+\sigma_f =  \frac{P}{2}L\tilde{x}\frac{z E_f}{D} && &\text{for } \frac{t_c}{2}<|z|<\frac{t_c}{2} + t_f \\
+\sigma_c = \frac{P}{2}L\tilde{x}\frac{z E_c}{D} && &\text{for } |z|<\frac{t_c}{2}
+\end{align}
+$M_{x,max}$ will be at $x/L = 1/2$ and $z_{max}$ is found from the limits:
+\begin{align}
+\sigma_{f,\max} &= \left(\frac{t_c}{2}+t_f\right)\frac{P E_f L}{4 D}  \\
+\sigma_{c,\max} &= \frac{t_c}{2}\frac{P E_c L}{4 D}
+\end{align}
+For the shear the maximum is already given with $T_{x,max}$ being $P/2$ in \cite[p. 3.4 eq. 3.14 and 3.15]{IntroSW}:
+\begin{align}
+\tau_{f,\max} &= \frac{T_{x,\max}}{D}\left(\frac{E_f t_f d}{2}\right) = \frac{P}{2D}\left(\frac{E_f t_f d}{2}\right) \\
+\tau_{c,\max} &= \frac{T_{x,\max}}{D}\left(\frac{E_f t_f d}{2}+\frac{E_ct_c^3}{8}\right) = \frac{P}{2D}\left(\frac{E_f t_f d}{2}+\frac{E_ct_c^3}{8}\right)
+\end{align}
+
+\section{Suggested design}
+In this section 3 designs are going to be presented. They all have the objective of minimizing the weight of the panel, while satisfying the maximum deflection, maximum loads and maximum thickness of the panel. \\
+The 3 designs has the following main objectives:
+\begin{enumerate}
+	\item Minimum weight with glass fiber faces and a maximum thickness of \unit[0.25]{m} with a safety factor of 1.5 
+	\item Minimum weight with steel faces and a maximum thickness of \unit[0.25]{m} with a safety factor of 1.5  	
+	\item Minimum weight with glass fiber faces and no maximum thickness with a safety factor of 1.5 
+\end{enumerate} 
+The first design is considered the primary design and it will also be the design that is investigated further with FEA.\\
+The other two designs do not meet the design requirement, with 2. not having fiber faces and 3. being thicker than \unit[0.25]{m}. \\
+These designs where chosen to investigate which possibilities might come if the design requirements where loosen. \\
+The safety factor is a factor that is multiplied with maximum values, and the values still has to be within maximum allowed values.\\
+All the design are optimized to have a minimum weight, with the weight calculated as:
+\begin{align}
+W_{mass} = L_{panel} \cdot w_{panel}\cdot \left(2 \cdot t_f \cdot \rho_f+t_c \cdot \rho_c\right) 
+\end{align}
+The optimization is done for each of the core grades and the design with the lowest weight that for fill the requirements is the design that was chosen.\\
+The fiber layup was chosen to a symmetrical TRIAX layup given as:
+\begin{align}
+\text{Layup scheduled} = \left[45,0-45\right]_s = \left[45,0,-45,-45,0,45\right]
+\end{align} 
+Each layer is here assumed to have the same thickness. The ABD matrix solver from the previous project was here used to calculate the elastic modulus of the laminate. 
+
 % Present 3 sugestions for panel deck 
-	% 1 Minimum skin thickness and lowest grad (Lighest brige)
-	% 2 
+	% 1 Min weight with glass fiber and 1.5 safty margien (Safe design)
+	% 2 Min weight with steel sheets and 1.5 safty margien (Safe design)
+	% 3 Min weight with glass fiber and 1.5 safty margien 0.7 m height allowed
 	% Show that panel dose not excte maxium loading 
 	
 \section{Part 2}
@@ -81,5 +220,7 @@
 		% Face wrinkling?!
 	
 
-
+%%% Refferences
+\bibliographystyle{plain}
+\bibliography{DoLCS_Proj2} 
 \end{document}

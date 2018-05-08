@@ -117,5 +117,7 @@ venv.bak/
 *.out
 *.pdf
 *.gz
+*.bbl
+*.blg
 
 
